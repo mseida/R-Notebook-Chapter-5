@@ -1,0 +1,157 @@
+---
+title: "R Notebook"
+output: html_notebook
+author: Maggie Seida
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+```{r}
+library("nycflights13")
+library("tidyverse")
+
+```
+
+```{r}
+nycflights13::flights
+View(flights)
+?flights
+```
+
+#int stands for integers.
+#dbl stands for doubles, or real numbers.
+#chr stands for character vectors, or strings.
+#dttm stands for date-times (a date + a time).
+
+
+```{r}
+jan1 <- filter(flights, month == 1, day == 1)
+```
+```{r}
+filter(flights, month == 11 | month == 12)
+```
+  
+
+If you want to determine if a value is missing, use is.na()  
+
+filter() only includes rows where the condition is TRUE; it excludes both FALSE and NA values. If you want to preserve missing values, ask for them explicitly  
+        - to ask explicitly, use comment notation to do this in parenthesis after              command
+
+
+
+Exercises 5.2:
+
+```{r}
+filter(flights, arr_delay >= 120) #10,200 flights
+
+filter(flights, dest == "IAH" | dest == "HOU") #9,313 flights
+
+airlines 
+
+
+filter(flights, carrier == "DL" | carrier == "AA" | carrier == "UA") #139,504 flights
+
+filter(flights, month >= 7, month <= 9) #86,326 flights
+  #with between fcn could do as 
+  filter(flights, between(month, 7, 9))
+
+summary(flights$dep_time)
+filter(flights, dep_time <= 600 | dep_time == 2400) #9,373 flights
+
+filter(flights, is.na(dep_time)) #8,255 flights
+
+
+```
+
+5.3
+arrange() works similarly to filter() except that instead of selecting rows, it changes their order
+
+```{r}
+arrange(flights, year, month, day)
+```
+
+Use desc() to re-order by a column in descending order and missing values are always sorted at the end
+
+5.3 Exersices:
+
+```{r}
+arrange(flights, is.na(desc(dep_delay)))
+arrange(flights, desc(is.na(dep_time)), dep_time)
+
+arrange(flights, desc(dep_delay)) #longest to shortest
+arrange(flights, dep_delay) #shortest to longest
+
+arrange(flights, desc(distance)) #4983 miles
+arrange(flights, distance) #17 miles
+
+
+```
+
+5.4
+select() allows you to rapidly zoom in on a useful subset using operations based on the names of the variables 
+
+b/c some data sets have hundreds or thousands of variables and not all are necessary for analysis--use select to just look at and work with the ones that are
+
+starts_with("abc"): matches names that begin with “abc”.
+ends_with("xyz"): matches names that end with “xyz”.
+contains("ijk"): matches names that contain “ijk”.
+
+5.4 Exercises
+
+```{r}
+select(flights, "dep_time", "dep_delay", "arr_time", "arr_delay")
+select(flights, dep_time, dep_delay, arr_time, arr_delay)
+select(flights, 4, 6, 7, 9) #this one uses column numbers of the variables
+select(flights, starts_with("dep_"), starts_with("arr_"))
+
+select(flights, year, month, day, year, year) #the select function does not count duplication and it only counts the vraiable once
+
+
+```
+5.5 
+useful to add new columns that are functions of existing columns
+, for this we can use mutate()
+
+```{r}
+flights_sml <- select(flights, 
+  year:day, 
+  ends_with("delay"), 
+  distance, 
+  air_time
+)
+mutate(flights_sml,
+  gain = dep_delay - arr_delay,
+  speed = distance / air_time * 60
+)
+#If you only want to keep the new variables, use transmute()
+
+#the function must be vectorised: it must take a vector of values as input, return a vector with the same number of values as output
+```
+
+5.5 Exercises
+```{r}
+air_time #I expect this to be the time of the flight in air 
+arr_time - dep_time
+```
+
+5.6 
+summarise () groups key data into a single row 
+```{r}
+summarise (flights)
+summarise(flights, delay = mean(dep_delay, na.rm = TRUE))
+summary(flights) # I prefer summary bc it gives you more data options to look at 
+```
+
